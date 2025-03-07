@@ -72,8 +72,8 @@ function parseBoltArtifactXML(xmlString) {
    */
   
   // For Node.js environment (requires the JSDOM package)
+  import { JSDOM } from 'jsdom';
   function parseBoltArtifactXMLNode(xmlString) {
-    const { JSDOM } = require('jsdom');
     const dom = new JSDOM(xmlString);
     const document = dom.window.document;
     
@@ -99,8 +99,12 @@ function parseBoltArtifactXML(xmlString) {
     const actionElements = artifactElement.querySelectorAll("boltAction");
     
     actionElements.forEach(actionElement => {
-      const action = {
-        type: actionElement.getAttribute("type"),
+      const action:{
+        type: "file" | "shell",
+        attributes: any,
+        content?: string
+      } = {
+        type: actionElement.getAttribute("type") as "file" | "shell",
         attributes: {},
         content: ''
       };
@@ -113,7 +117,7 @@ function parseBoltArtifactXML(xmlString) {
       });
       
       // Add the content of the action
-      action.content = actionElement.textContent.trim();
+      action.content = actionElement.textContent?.trim();
       
       artifact.actions.push(action);
     });
@@ -134,4 +138,4 @@ function parseBoltArtifactXML(xmlString) {
     }
   }
   
-  module.exports = { parseXML, parseBoltArtifactXML, parseBoltArtifactXMLNode };
+  export { parseXML, parseBoltArtifactXML, parseBoltArtifactXMLNode };
