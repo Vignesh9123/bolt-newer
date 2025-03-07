@@ -1,16 +1,23 @@
 {
   "name": "backend",
-  "version": "1.0.0",
-  "main": "index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.ts"
+"version": "1.0.0",
+"main": "index.ts",
+"scripts": {
+"test": "echo \"Error: no test specified\" && exit 1",
+"start": "nodemon index.ts",
+"dev": "nodemon index.ts"
+},
+  "imports": {
+    "#routes/*": "./routes/*.ts",
+    "#controllers/*": "./controllers/*.ts",
+    "#middlewares/*": "./middlewares/*.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/generative-ai": "^0.24.0",
     "@repo/db": "*",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
