@@ -1,15 +1,14 @@
 import dotenv from "dotenv";
-import {GoogleGenerativeAI} from '@google/generative-ai'
+import { genAI } from "@repo/config";
 dotenv.config();
 export const config = {
     PORT: Number(process.env.PORT || 9090),
     FIREBASE_PROJECT_ID:String(process.env.FIREBASE_PROJECT_ID),
     JWT_SECRET: String(process.env.JWT_SECRET),
     CLIENT_URL: String(process.env.CLIENT_URL),
-    GEMINI_API_KEY: String(process.env.GEMINI_API_KEY),
 }
 
-const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
+
 
 export const templateModel = genAI.getGenerativeModel({
     model:"gemini-2.0-flash",
