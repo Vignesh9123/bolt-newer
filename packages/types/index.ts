@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, {Document} from "mongoose";
 
 export interface IUser extends Document {
     name: string;
@@ -23,5 +23,5 @@ export interface IProject extends Document {
     }[];
     createdAt: Date;
     updatedAt: Date;
-    }
+}
     

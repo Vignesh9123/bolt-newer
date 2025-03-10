@@ -4,14 +4,14 @@
   "main": "index.ts",
   "exports": {
     "./models/*": "./dist/models/*.js",
-    ".":"./dist/index.js"
+    ".": "./dist/index.js"
   },
-  
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "mongoose": "^8.12.0",
-    "@repo/types": "*"
+    "@repo/types": "*",
+    "dotenv": "^16.4.7",
+    "mongoose": "^8.12.0"
   }
 }
