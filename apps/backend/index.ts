@@ -7,6 +7,7 @@ import { config } from "./config";
 const app = express();
 
 app.use(cors({
+    credentials: true,
     origin: config.CLIENT_URL
 }));
 app.use(express.json());
@@ -15,7 +16,11 @@ app.use(cookieParser());
 app.use('/api/v1', indexRouter);
 
 
+import { Request } from 'express';
 
+export interface AuthenticatedRequest extends Request {
+  user?: { id: string }; // Adjust based on your user object
+}
 
 app.listen(config.PORT, async () => {
     try {

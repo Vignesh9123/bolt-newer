@@ -3,8 +3,9 @@ import {User} from "@repo/db/models/User.model";
 import jwt from "jsonwebtoken";
 import { app } from "../config/firebaseAdmin";
 import { config } from "../config";
+import { AuthenticatedRequest } from "..";
 
-export const auth =async (req: Request, res: Response) => {
+export const auth =async (req: AuthenticatedRequest, res: Response) => {
     // TODO: Get idToken from req.body and use it to verify the user
     try {
         const {idToken}:{idToken: string} = req.body;
@@ -38,13 +39,13 @@ export const auth =async (req: Request, res: Response) => {
         .status(200)
         .json({token});
         return
-    } catch (error) {
+    } catch (error: any) {
         res.status(400).json({error: error.message || 'Something went wrong'});
         console.error('Failed to authenticate user: ',error);
     }
 };
 
-export const logout = (req: Request, res: Response) => {
+export const logout = (req: AuthenticatedRequest, res: Response) => {
     try {
         res
         .clearCookie('token', {
@@ -55,13 +56,13 @@ export const logout = (req: Request, res: Response) => {
         })
         .status(200)
         .json({message: 'Logged out'});
-    } catch (error) {
+    } catch (error : any) {
         res.status(400).json({error: error.message || 'Something went wrong'});
         console.error('Failed to logout user: ',error);
     }
 }
 
-export const currentUser = async(req: Request, res: Response) => {
+export const currentUser = async(req: AuthenticatedRequest, res: Response) => {
    try {
     const userId = req.user?.id;
     const user = await User.findById(userId);
@@ -70,7 +71,7 @@ export const currentUser = async(req: Request, res: Response) => {
         return
     }
     res.status(200).json(user);
-   } catch (error) {
+   } catch (error : any) {
     res.status(400).json({error: error.message || 'Something went wrong'});
     console.error('Failed to get current user: ',error);
    }

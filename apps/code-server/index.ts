@@ -6,13 +6,19 @@ import Project from '@repo/db/models/Project.model'
 import { IProject } from '@repo/types';
 import {parseXML} from './xmlParser'
 import { onFileCommand ,onShellCommand } from './os'
+import cors from 'cors'
 const app = express()
 
 app.use(express.json());
+app.use(cors({
+    origin:"http://localhost:3000",
+    credentials: true
+}))
 
 app.post('/prompt', async (req, res) => {
     try {
         const {projectId, prompt} = req.body;
+        console.log('prompt', prompt);
         const project = await Project.findById(projectId) as IProject;
         const history = project.chats?.map((chat) => ({role: chat.from == "user" ? "user" : "model", parts: [{text: chat.content.content}]})) as any || [] ;
         const session = promptModel.startChat(

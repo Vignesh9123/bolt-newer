@@ -1,6 +1,11 @@
 import dotenv from "dotenv";
 import { genAI } from "@repo/config";
-dotenv.config();
+import path from "path";
+dotenv.config(
+    {
+        path: path.resolve(__dirname,'..', '.env')
+    }
+);
 export const config = {
     PORT: Number(process.env.PORT || 9090),
     FIREBASE_PROJECT_ID:String(process.env.FIREBASE_PROJECT_ID),

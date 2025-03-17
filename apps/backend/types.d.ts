@@ -1,11 +1,7 @@
-// Add user to req
-export {}
-declare global {
-    namespace Express {
-        interface Request {
-            user?: {
-                id: string;
-            };
-        }
-    }
+import { Request } from 'express';
+
+declare module 'express' {
+  export interface Request {
+    user?: { id: string }; // Modify according to your user structure
+  }
 }

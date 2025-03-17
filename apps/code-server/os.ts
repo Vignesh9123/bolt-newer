@@ -2,7 +2,7 @@ import { spawn, spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-const BASE_DIR = path.join(__dirname, '..', 'tmp');
+const BASE_DIR = path.join(__dirname, 'tmp');
 
 console.log('BASE_DIR', BASE_DIR);
 

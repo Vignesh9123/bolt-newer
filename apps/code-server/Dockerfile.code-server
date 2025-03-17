@@ -17,7 +17,12 @@ EXPOSE 8080
 
 RUN git clone https://github.com/code100x/base-react-native-expo.git /tmp/bolty-worker
 RUN cd /tmp/bolty-worker && npm install
-# RUN touch -r  ./.local/share/code-server/Machine/settings.json && echo '{ "workbench.colorTheme": "Default Dark Modern" }' > ~/.local/share/code-server/Machine/settings.json
+
+# Copy the script with proper destination path
+COPY main.sh /usr/local/bin/main.sh
+
+# Make the script executable
+RUN sudo chmod +x /usr/local/bin/main.sh
 
 # Start code-server on container launch
-CMD ["code-server", "--auth", "none", "--bind-addr", "0.0.0.0:8080", "/tmp/bolty-worker"]
+ENTRYPOINT ["/usr/local/bin/main.sh"]
