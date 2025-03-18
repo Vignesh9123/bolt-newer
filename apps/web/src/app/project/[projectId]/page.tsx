@@ -13,6 +13,7 @@ function page({params}:{params:Usable<{projectId: string}>}) {
     const router = useRouter()
     const [codeServerUrl, setCodeServerUrl] = useState<string>("http://localhost:9091")
     const [promptInput, setPromptInput] = useState<string>("")
+    const [loading, setLoading] = useState<boolean>(false)
     const fetchProject = async (initial?: boolean) => {
         try {
             const response = await api.get(`/project/${projectId}?initial=${initial}`)
@@ -30,12 +31,17 @@ function page({params}:{params:Usable<{projectId: string}>}) {
     const onSendClick = async()=>{
         console.log("Hello")
         try {
+            setLoading(true)
             const response = await api.post(`${codeServerUrl}/prompt`, {projectId, prompt: promptInput})
-            const {project, content} = response.data.data;
-            console.log({project, content});
+            const { content} = response.data;
+            console.log({ content});
+            setPromptInput("")
         } catch (error) {
             alert("Error")
             console.log(error);   
+        }
+        finally{
+            setLoading(false)
         }
 
     }
@@ -60,7 +66,7 @@ function page({params}:{params:Usable<{projectId: string}>}) {
             <div className="absolute bottom-2 w-full flex">
 
             <Input value={promptInput} onChange={(e)=>setPromptInput(e.target.value)} className="bg-white dark:bg-black m-2" placeholder="Enter your prompt"/>
-            <Button onClick={onSendClick} className="bg-white dark:bg-black m-2 cursor-pointer">
+            <Button disabled={loading} onClick={onSendClick} className="bg-white dark:bg-black m-2 cursor-pointer">
                 <Send  className="text-black dark:text-white"/>
             </Button>
             </div>

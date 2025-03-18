@@ -24,5 +24,8 @@ COPY main.sh /usr/local/bin/main.sh
 # Make the script executable
 RUN sudo chmod +x /usr/local/bin/main.sh
 
+RUN mkdir -p /home/coder/.local/share/code-server/Machine   
+RUN echo '{"workbench.colorTheme": "Dark+", "workbench.preferredDarkColorTheme": "Dark+"}' > /home/coder/.local/share/code-server/Machine/settings.json
+
 # Start code-server on container launch
 ENTRYPOINT ["/usr/local/bin/main.sh"]
