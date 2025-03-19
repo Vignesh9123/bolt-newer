@@ -425,9 +425,13 @@ export class XMLParser {
   append(string: string) {
     this.currentString += string;
   }
-  parse() {
+  parse():string | undefined {
     const actionStart = this.currentString.split("\n").findIndex((line) => line.trim().startsWith("<boltAction"));
-    if(actionStart == -1) return;
+    if(actionStart == -1){
+      const actionEnd = this.currentString.split("\n").findIndex((line) => line.trim().startsWith("</boltAction"));
+      if(actionEnd == -1) return;
+      else throw new Error("Invalid XML");
+    }
     this.currentString = this.currentString.split("\n").slice(actionStart).join("\n");
     const actionEnd = this.currentString.split("\n").findIndex((line) => line.trim().startsWith("</boltAction"));
     if(actionEnd == -1) return;
@@ -442,12 +446,13 @@ export class XMLParser {
     const content = actionString.split("\n").slice(1, -1).join("\n");
     this.currentString = this.currentString.split("\n").slice(actionEnd + 1).join("\n");
     if(this.currentString.trim().startsWith("<boltAction")) {
-      this.parse();
+      console.log("Content", content.trim());
+      return content?.split('\n').map((line) => line.trim()).join('\n') + this.parse() || "";
     } 
-    return content;
+    console.log("Content", content.trim());
+    return content.trim() || "";
   }
 }
-
 
 interface Artifact {
   id: string;
@@ -460,3 +465,4 @@ interface Artifact {
     content?: string;
   }[];
 }
+
