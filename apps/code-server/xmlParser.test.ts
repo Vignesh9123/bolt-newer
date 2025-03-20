@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert';
 import { XMLParser } from './xmlParser';
 
-// TODO: Update tests to include file and shell commands using the callback functions in the XMLParser class
+// TODO: Make sure to uncomment the required lines in xmlParser.ts file before running these tests
 test('XMLParser should parse file commands', (t) => {
     const xmlParser = new XMLParser({});
     const xml = `
@@ -122,11 +122,8 @@ test('XMLParser should parse extremely chunked XML', (t) => {
 })
 
 test('XMLParser should handle nested JSX content', (t) => {
-    // Arrange
-    const fileCommands: Array<{filePath: string, content: string}> = [];
     const parser = new XMLParser({});
 
-    // Act
     parser.append(`
         <boltAction type="file" filePath="app/_layout.tsx">
             import { Stack } from 'expo-router';
@@ -147,9 +144,180 @@ test('XMLParser should handle nested JSX content', (t) => {
         </boltAction>
     `);
     const content = parser.parse();
-    // Assert
-    // assert.strictEqual(fileCommands.length, 1);
-    // assert.strictEqual(fileCommands[0].filePath, 'app/_layout.tsx');
     assert.ok(content?.includes('<Stack.Screen'));
     assert.ok(content?.includes('headerShown: false'));
+});
+
+
+
+test('XMLParser should parse file content with CDATA tag wrapped around', (t) => {
+    const xmlParser = new XMLParser({});
+    const xml = `
+    <boltAction type="file" filePath="app/component.tsx">
+    <![CDATA[
+        import React from 'react';
+        
+        export default function Component() {
+            return (
+                <div>
+                    <CustomComponent 
+                        prop={value > 0 && <span>Hello</span>}
+                        data={{ key: "value" }}
+                    />
+                </div>
+            );
+        }
+    ]]>
+    </boltAction>
+    `;
+    xmlParser.append(xml);
+    const result = xmlParser.parse();
+    
+    // Assert that the content is preserved exactly as is within CDATA
+    assert.ok(result?.includes('<CustomComponent'));
+    assert.ok(result?.includes('prop={value > 0'));
+    assert.ok(result?.includes('<span>Hello</span>'));
+    assert.ok(result?.includes('data={{ key: "value" }}'));
+    // Check that the CDATA tags themselves are removed
+    assert.ok(!result?.includes('CDATA'));
+    assert.ok(!result?.includes(']]>'));
+});
+
+test('XMLParser should parse file content with CDATA tag wrapped around in multiple chunks', (t) => {
+    const xmlParser = new XMLParser({});
+    const xml = `
+    <boltAction type="file" filePath="app/component.tsx">
+    <![CDATA[
+        import React from 'react';
+        
+        export default function Component() {
+            return (
+                <div>
+                    <CustomComponent 
+                        prop={value > 0 && <span>Hello</span>}
+                        data={{ key: "value" }}
+                    />
+                </div>
+                `
+    xmlParser.append(xml);
+    const xml2 = `
+            );
+        }
+    ]]>
+        </boltAction>`
+    xmlParser.append(xml2);
+    const result = xmlParser.parse();
+    
+    // Assert that the content is preserved exactly as is within CDATA
+    assert.ok(result?.includes('<CustomComponent'));
+    assert.ok(result?.includes('prop={value > 0'));
+    assert.ok(result?.includes('<span>Hello</span>'));
+
+    // Check that the CDATA tags themselves are removed
+    assert.ok(!result?.includes('CDATA'));
+    assert.ok(!result?.includes(']]>'));
+});
+
+test('XMLParser should handle onFileCommand function correctly', (t) => {
+    
+    let capturedFilePath = '';
+    let capturedContent = '';
+    const xmlParser = new XMLParser({
+        onFileCommand: (filePath, content) => {
+            capturedFilePath = filePath;
+            capturedContent = content;
+        }
+    });
+
+    const xml = `
+    <boltAction type="file" filePath="src/App.tsx">
+        import React from 'react';
+        
+        export default function App() {
+            return <div>Hello World</div>;
+        }
+    </boltAction>
+    `;
+    xmlParser.append(xml);
+    xmlParser.parse();
+
+    assert.equal(capturedFilePath, 'src/App.tsx');
+    assert.ok(capturedContent.includes('import React'));
+    assert.ok(capturedContent.includes('export default function App'));
+    assert.ok(capturedContent.includes('<div>Hello World</div>'));
+});
+
+test('XMLParser should handle onFileCommand function correctly for multiple file commands', (t) => {
+    const capturedFiles: Array<{filePath: string, content: string}> = [];
+    const xmlParser = new XMLParser({
+        onFileCommand: (filePath, content) => {
+            capturedFiles.push({ filePath, content });
+        }
+    });
+
+    const xml = `
+    <boltAction type="file" filePath="src/App.tsx">
+        import React from 'react';
+        export default function App() {
+            return <div>Hello World</div>;
+        }
+    </boltAction>
+    <boltAction type="file" filePath="src/styles.css">
+        .container {
+            padding: 20px;
+        }
+    </boltAction>
+    <boltAction type="file" filePath="src/utils.ts">
+        export function helper() {
+            return 'helper';
+        }
+    </boltAction>
+    `;
+    xmlParser.append(xml);
+    xmlParser.parse();
+
+    assert.equal(capturedFiles.length, 3);
+    
+    // First file
+    assert.equal(capturedFiles[0].filePath, 'src/App.tsx');
+    assert.ok(capturedFiles[0].content.includes('import React'));
+    assert.ok(capturedFiles[0].content.includes('<div>Hello World</div>'));
+
+    // Second file
+    assert.equal(capturedFiles[1].filePath, 'src/styles.css');
+    assert.ok(capturedFiles[1].content.includes('.container'));
+    assert.ok(capturedFiles[1].content.includes('padding: 20px'));
+
+    // Third file
+    assert.equal(capturedFiles[2].filePath, 'src/utils.ts');
+    assert.ok(capturedFiles[2].content.includes('export function helper'));
+    assert.ok(capturedFiles[2].content.includes('return \'helper\''));
+});
+
+test('XMLParser should handle onShellCommand function correctly', (t) => {
+    const capturedCommands: string[] = [];
+    const xmlParser = new XMLParser({
+        onShellCommand: (content) => {
+            capturedCommands.push(content);
+        }
+    });
+
+    const xml = `
+    <boltAction type="shell">
+        npm install
+    </boltAction>
+    <boltAction type="shell">
+        npm run build
+    </boltAction>
+    <boltAction type="shell">
+        docker-compose up -d
+    </boltAction>
+    `;
+    xmlParser.append(xml);
+    xmlParser.parse();
+
+    assert.equal(capturedCommands.length, 3);
+    assert.equal(capturedCommands[0].trim(), 'npm install');
+    assert.equal(capturedCommands[1].trim(), 'npm run build');
+    assert.equal(capturedCommands[2].trim(), 'docker-compose up -d');
 });
