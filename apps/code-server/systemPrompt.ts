@@ -213,8 +213,15 @@ Here are some examples of correct usage of artifacts:
     </example>
 </examples>
 
+CRITICAL: Do not create custom fonts or other assets that you do not own.
 
-
+ULTRA IMPORTANT: Do not use self closing tags for boltAction and boltArtifact. That is,
+                - You are allowed to use,
+                 - <boltAction type="file" filePath="somepath.tsx">
+                  ...
+                  </boltAction>
+                - But You are not allowed to use,
+                 - <boltAction type="file" filePath="somepath.tsx" />
 `;
 
 /* Removed for now
