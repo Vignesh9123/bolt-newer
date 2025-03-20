@@ -426,6 +426,7 @@ export class XMLParser {
     this.currentString += string;
   }
   parse():string | undefined {
+    // console.log("Current String", this.currentString);
     const actionStart = this.currentString.split("\n").findIndex((line) => line.trim().startsWith("<boltAction"));
     if(actionStart == -1){
       const actionEnd = this.currentString.split("\n").findIndex((line) => line.trim().startsWith("</boltAction"));
@@ -434,23 +435,31 @@ export class XMLParser {
     }
     this.currentString = this.currentString.split("\n").slice(actionStart).join("\n");
     const actionEnd = this.currentString.split("\n").findIndex((line) => line.trim().startsWith("</boltAction"));
-    if(actionEnd == -1) return;
+    if(actionEnd == -1){
+      return;
+    }
     const actionString = this.currentString.split("\n").slice(0, actionEnd + 1).join("\n");
-    console.log("actionString", actionString);
+    // console.log("actionString", actionString);
     const type = actionString.match(/type="([^"]+)"/)?.[1];
     console.log("type", type);
+    const content = actionString.split("\n").slice(1, -1).join("\n").split("<![CDATA[").join("").split("]]>").join("")
     if(type == "file") {
-      const filePath = actionString.match(/filePath="([^"]+)"/)?.[1];
+      const filePath = actionString.match(/filePath="([^"]+)"/)?.[1] ;
+      if(!filePath) console.warn("File path not found");
       console.log("filePath", filePath);
+      this.onFileCommand(filePath || 'sample.txt', content);
     }
-    const content = actionString.split("\n").slice(1, -1).join("\n");
+    else if(type == "shell") {
+      this.onShellCommand(content);
+    }
     this.currentString = this.currentString.split("\n").slice(actionEnd + 1).join("\n");
     if(this.currentString.trim().startsWith("<boltAction")) {
-      console.log("Content", content.trim());
-      return content?.split('\n').map((line) => line.trim()).join('\n') + this.parse() || "";
+      // console.log("Content", content.trim());
+      return content?.split('\n').map((line) => line.trim()).join('\n') + this.parse() || ""; // Use this for only test purposes else we can comment this line
+      // return this.parse(); // Use this if not testing the parser
     } 
-    console.log("Content", content.trim());
-    return content.trim() || "";
+    // console.log("Content", content.trim());
+    return content.trim() || ""; // Use this for only test purposes else we can comment this line
   }
 }
 
