@@ -441,12 +441,12 @@ export class XMLParser {
     const actionString = this.currentString.split("\n").slice(0, actionEnd + 1).join("\n");
     // console.log("actionString", actionString);
     const type = actionString.match(/type="([^"]+)"/)?.[1];
-    console.log("type", type);
+    // console.log("type", type);
     const content = actionString.split("\n").slice(1, -1).join("\n").split("<![CDATA[").join("").split("]]>").join("")
     if(type == "file") {
       const filePath = actionString.match(/filePath="([^"]+)"/)?.[1] ;
       if(!filePath) console.warn("File path not found");
-      console.log("filePath", filePath);
+      // console.log("filePath", filePath);
       this.onFileCommand(filePath || 'sample.txt', content);
     }
     else if(type == "shell") {
