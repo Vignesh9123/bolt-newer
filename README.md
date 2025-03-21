@@ -14,13 +14,21 @@ Trying to build a [Bolt.new](https://bolt.new/) clone
 ## Setup
 
 ### Prerequisites
-- Docker
+- Docker - Make sure Docker is running
 - Node.js
 - MongoDB (Using Docker or Atlas)
+- Firebase (Will be used for authentication in future)
+- Gemini API Key (Will be switching to Claude most probably in the future)
 - Build the code-server image:
  ``` sh
  docker build -t code-server ./apps/code-server -f ./apps/code-server/Dockerfile.code-server
  ```
+- Required Keys/Environment Variables:
+  - Gemini API Key
+  - MongoDB URI (Cloud or Local)
+  - Firebase Credentials (Will be used for authentication in future)
+- Copy .env.example file to .env file in each app/package (apps/code-server, apps/backend, apps/web, packages/db, packages/config)
+
 ### Installation and Running
 - Install dependencies: `npm install`
 - Run Development Server: `npm run dev`

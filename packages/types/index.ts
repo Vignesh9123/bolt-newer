@@ -24,4 +24,33 @@ export interface IProject extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
-    
+
+export interface CommandItem {
+    id: string;
+    command: string;
+    priority: number;
+    timeout?: number;
+    startTime?: number;
+  }
+  
+export interface CommandResult {
+    id: string;
+    success: boolean;
+    output: string;
+    error?: string;
+    exitCode?: number;
+  }
+  
+export interface ProcessedCommand extends CommandItem, CommandResult {}
+  
+export interface GetCommandStatus extends ProcessedCommand{
+      status: CommandStatus
+  }
+export enum CommandStatus {
+    PENDING = 'PENDING',
+    RUNNING = 'RUNNING',
+    COMPLETED = 'COMPLETED',
+    SUCCESS = 'SUCCESS',
+    FAILED = 'FAILED',
+    NOT_FOUND = 'NOT_FOUND'
+  }
