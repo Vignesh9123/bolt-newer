@@ -35,6 +35,7 @@ class CommandQueue {
     command.startTime = Date.now();
 
     try {
+      console.log(`Executing command: ${command.command} with id: ${command.id}`);
       await this.executeCommand(command);
       // Stream this to frontend so that it should display that this command with commandID is completed and next command should start
     } catch (error) {
@@ -165,6 +166,7 @@ export const onShellCommand = (command: string, priority: number = 0, timeout?: 
   const commandId = commandQueue.enqueue(command, priority, timeout);
   return commandId; // TODO: Send {commandId, command} to client so that it can push it in it's commands array and hence track the commands
 };
+
 // function getDummyStatus(){
 //     const interval = setInterval(() => {
 //       console.log('Dummy status:', commandQueue.getCommandStatus(commandId));
@@ -174,9 +176,20 @@ export const onShellCommand = (command: string, priority: number = 0, timeout?: 
 //     }, 1000);
 //   }
 //   getDummyStatus();
-onShellCommand('node test.js');
-onShellCommand('node test.js');
 
+// onShellCommand('node test.js');
+// Content of test.js
+/*
+async function main(){
+    console.log("hello world")
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    console.log("hello world 2")
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    console.log("hello world 3")
+}
+
+main()
+*/
 export const onFileCommand = (command:{
     filePath:string,
     content: string

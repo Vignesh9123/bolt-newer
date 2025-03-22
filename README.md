@@ -36,11 +36,12 @@ Trying to build a [Bolt.new](https://bolt.new/) clone
 ## Problems with the current codebase
 
 - Code Server: Fast Refresh of Expo is not working (it is not refreshing the page when the code changes) .This problem is solved for Next.js by using `WATCHPACK_POLLING=true next dev` instead of just `next dev`
+  - This problem doesn't occur when there is no volume bind mount while running the code-server image
   - Tried Solutions:
     - Used `WATCHPACK_POLLING=true`/ `CHOKIDAR_POLLING=true` for expo - Doesn't work
     - Port mapped the code-server to 19000, 19001, 19002 - Suggested by ChatGPT - Doesn't work
    - Probable Solution: 
-     - `inotifywait`(Google this) - This doesn't seem to work for any file in /tmp/bolty-worker directory but it works for any file in other directories
+     - Figuring out the way to sync files between code-server and local-system(worker) without volume bind mount will do the work most probably
 
 - Code Server: Streaming file changes to frontend (Just like Bolt does) - This is trickier in code-server as we maybe need to create a custom vscode extension to open the files in code-server as it is being changed/updated by the worker just like [Harkirat](https://www.youtube.com/watch?v=4JdUPCT37fI) does
   - Probable Solution: 
