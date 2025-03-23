@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { IProject } from '@repo/types';
+import { IProject } from '../types';
 
 const ProjectSchema: Schema = new Schema(
     {
