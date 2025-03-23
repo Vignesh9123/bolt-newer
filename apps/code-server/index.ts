@@ -39,7 +39,6 @@ app.post('/prompt', async (req, res) => {
         )
         const response = await session.sendMessageStream(prompt);
         let xmlWrappedContent = ''
-        // const xmlWrappedContent = response.response.text()
         const xmlParserFunctions = {
             "file": (filePath: string, content: string) => {
                 onFileCommand({
@@ -56,31 +55,16 @@ app.post('/prompt', async (req, res) => {
             xmlWrappedContent += chunk.candidates?.[0].content.parts[0].text;
             
             const currentContent = chunk.candidates?.[0].content.parts[0].text || '';
-            // console.log('currentContent', currentContent);
             let content = currentContent.split("```xml").length > 1 ? currentContent.split("```xml")[1].split("```")[0] : currentContent.split("```xml")[0].split("```")[0];
             if(content.trim() =="```" || content.trim() == "xml" || content.trim() == "") continue;
             if(content.trim().includes("xml")){
                 content = content.split("xml")[1];
             }
-            // console.log('content', content);
-            // const jsonParsedData = parseXML(content);
-            // jsonParsedData.actions.map((js:any) => {
-            //     if(js.type == "file"){
-            //         onFileCommand({
-            //             filePath: js.attributes.filepath,
-            //             content: js.content
-            //         })
-            //     }
-            //     if(js.type == "shell"){
-            //         onShellCommand(js.content)
-            //     }
-            //     console.log('jsonParsedData', jsonParsedData);
-            // });
             parser.append(content);
             parser.parse();
         }
-        // project.chats?.push({from: "user", content: {type: "text", content: prompt}});
-        // project.chats?.push({from: "assistant", content: {type: "text", content: xmlWrappedContent}});
+        project.chats?.push({from: "user", content: {type: "text", content: prompt}});
+        project.chats?.push({from: "assistant", content: {type: "text", content: xmlWrappedContent}});
         
         console.log("All commands executed");
         console.log("Go to http://localhost:8081 to see the changes");
