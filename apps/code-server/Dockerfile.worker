@@ -1,0 +1,16 @@
+FROM node:22.12.0-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+# Copy everything except tmp folder
+COPY . .
+RUN mkdir -p /app/tmp
+
+EXPOSE 9091
+EXPOSE 27017
+
+CMD ["npm", "run", "dev"]

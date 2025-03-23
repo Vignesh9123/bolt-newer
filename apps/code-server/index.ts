@@ -1,17 +1,87 @@
-import {connectDB} from '@repo/db'
+// import {connectDB} from '@repo/db'
 import express from 'express'
 import { config, promptModel } from './config'
-import { authMiddleware } from '@repo/config/middlewares/auth.middleware'
-import Project from '@repo/db/models/Project.model'
-import { IProject } from '@repo/types';
+// import { authMiddleware } from '@repo/config/middlewares/auth.middleware'
+// import Project from '@repo/db/models/Project.model'
+// import { IProject } from '@repo/types';
 import { XMLParser } from './xmlParser'
 import { onFileCommand ,onShellCommand } from './os'
 import cors from 'cors'
+import dotenv from 'dotenv'
+dotenv.config();
+import mongoose, { Schema } from 'mongoose';
 const app = express()
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/bolt';
+
+export const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) return;
+  try {
+    await mongoose.connect(MONGO_URI);
+    console.log('Connected to MongoDB');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+  }
+};
+
+
+const ProjectSchema: Schema = new Schema(
+    {
+        description: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        type: {
+            type: String,
+            enum: ['web', 'app'],
+            required: true,
+        },
+        chats: [
+            {
+                from: {
+                    type: String,
+                    enum: ['user', 'assistant'],
+                    required: true,
+                },
+                content: {
+                    type: {
+                        type: String,
+                        enum: ['action', 'text'],
+                        required: true,
+                    },
+                    content: {
+                        type: String,
+                        required: true,
+                    },
+                },
+            },
+        ],
+        userId: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            //required: true, //TODO: add this
+        },
+        s3Storage: 
+            {
+                key: {
+                    type: String,
+                },
+                url: {
+                    type: String,
+                },
+            },
+    },
+    { timestamps: true }
+);
+
+export const Project = mongoose.model<any>('Project', ProjectSchema);
+
+
 
 app.use(express.json());
 app.use(cors({
-    origin:"http://localhost:3000",
+    origin:"http://localhost:3000", // TODO: Check this as the api is now running in a docker container
     credentials: true
 }))
 
@@ -19,8 +89,8 @@ app.post('/prompt', async (req, res) => {
     try {
         const {projectId, prompt} = req.body;
         console.log('prompt', prompt);
-        const project = await Project.findById(projectId) as IProject;
-        const history = project.chats?.map((chat) => ({role: chat.from == "user" ? "user" : "model", parts: [{text: chat.content.content}]})) as any || [] ;
+        const project = await Project.findById(projectId) as any;
+        const history = project.chats?.map((chat: any) => ({role: chat.from == "user" ? "user" : "model", parts: [{text: chat.content.content}]})) as any || [] ;
         //One-shot response - Receive a single big response
         // const session = promptModel.startChat(
         //     {

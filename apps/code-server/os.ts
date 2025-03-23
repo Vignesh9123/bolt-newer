@@ -1,11 +1,39 @@
 import { exec, ChildProcess } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { CommandItem, ProcessedCommand, CommandResult, GetCommandStatus, CommandStatus } from '@repo/types';
+// import { CommandItem, ProcessedCommand, CommandResult, GetCommandStatus, CommandStatus } from '@repo/types';
 const BASE_DIR = path.join(__dirname, 'tmp');
 console.log('BASE_DIR', BASE_DIR);
 
+export interface CommandItem {
+  id: string;
+  command: string;
+  priority: number;
+  timeout?: number;
+  startTime?: number;
+}
 
+export interface CommandResult {
+  id: string;
+  success: boolean;
+  output: string;
+  error?: string;
+  exitCode?: number;
+}
+
+export interface ProcessedCommand extends CommandItem, CommandResult {}
+
+export interface GetCommandStatus extends ProcessedCommand{
+    status: CommandStatus
+}
+export enum CommandStatus {
+  PENDING = 'PENDING',
+  RUNNING = 'RUNNING',
+  COMPLETED = 'COMPLETED',
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  NOT_FOUND = 'NOT_FOUND'
+}
 
 class CommandQueue {
   private queue: CommandItem[] = [];

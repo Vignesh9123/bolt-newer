@@ -5,26 +5,26 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon index.ts",
-    "dev": "docker run -d -p 8080:8080 -p 8081:8081 -v C:/Users/A/Desktop/bolt-newer/apps/code-server/tmp:/tmp/bolty-worker code-server && nodemon index.ts"
+    "dev": "ts-node --ignore tmp index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@repo/config": "*",
-    "@repo/db": "*",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "jsdom": "^26.0.0",
     "mongoose": "^8.12.1",
-    "ws": "^8.18.1"
+    "ws": "^8.18.1",
+    "@google/generative-ai": "^0.24.0"
   },
   "devDependencies": {
-    "@repo/types": "*",
     "@types/express": "^5.0.0",
     "@types/jsdom": "^21.1.7",
-    "@types/ws": "^8.18.0"
+    "@types/ws": "^8.18.0",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "@types/cors": "^2.8.17"
   }
 }
