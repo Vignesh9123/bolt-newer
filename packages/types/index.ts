@@ -25,6 +25,21 @@ export interface IProject extends Document {
     updatedAt: Date;
 }
 
+export interface IChatBlock extends Document {
+    projectId: mongoose.Types.ObjectId;
+    role: 'user' | 'assistant';
+    actions: mongoose.Types.ObjectId[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface IAction extends Document {
+    chatBlockId: mongoose.Types.ObjectId;
+    desc: string;
+    createdAt: Date;
+    status: CommandStatus;
+}
+
 export interface CommandItem {
     id: string;
     command: string;
@@ -53,4 +68,4 @@ export enum CommandStatus {
     SUCCESS = 'SUCCESS',
     FAILED = 'FAILED',
     NOT_FOUND = 'NOT_FOUND'
-  }
+}
