@@ -21,15 +21,20 @@ app.use(cors({
 
 app.post('/prompt', async (req, res) => {
     try {
+        res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
         const {projectId, prompt} = req.body;
         console.log('prompt', prompt);
         const project = await Project.findById(projectId) as IProject;
         const history = project.chats?.map((chat: any) => ({role: chat.from == "user" ? "user" : "model", parts: [{text: chat.content.content}]})) as any || [] ;
+        console.log('Something')
         const userChatBlock = await ChatBlockModel.create({
             projectId,
-            role: "user",
-            prompt
+            role: 'user',
+            prompt: prompt
         })
+        console.log('Something 2')
         project.chatBlocks.push(userChatBlock._id as mongoose.Types.ObjectId);
         //One-shot response - Receive a single big response
         // const session = promptModel.startChat(
@@ -75,7 +80,7 @@ app.post('/prompt', async (req, res) => {
                 content = content.split("xml")[1];
             }
             parser.append(content);
-            parser.parse();
+            parser.parse(res);
         }
         project.chats?.push({from: "user", content: {type: "text", content: prompt}});
         project.chats?.push({from: "assistant", content: {type: "text", content: xmlWrappedContent}});
@@ -83,10 +88,13 @@ app.post('/prompt', async (req, res) => {
         console.log("All commands executed");
         console.log("Go to http://localhost:8081 to see the changes");
         await project.save();
-        res.status(200).json({content: xmlWrappedContent.split("```xml")[1].split("```")[0], project});
+        // res.status(200).json({content: xmlWrappedContent.split("```xml")[1].split("```")[0], project});
+        res.end(`data: ${JSON.stringify({ content: xmlWrappedContent.split("```xml")[1].split("```")[0], project })}\n\n`);
+        return
     } catch (error:any){
         console.log(error)
-        res.status(400).json({error: error.message || 'Something went wrong'}); 
+        res.end(`data: ${JSON.stringify({ error: error.message || 'Something went wrong' })}\n\n`);
+        return 
     }
 })
 

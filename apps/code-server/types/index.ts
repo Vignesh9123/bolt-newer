@@ -30,6 +30,7 @@ export interface IChatBlock extends Document {
     projectId: mongoose.Types.ObjectId;
     role: 'user' | 'assistant';
     actions: mongoose.Types.ObjectId[];
+    prompt: string;
     createdAt: Date;
     updatedAt: Date;
 }

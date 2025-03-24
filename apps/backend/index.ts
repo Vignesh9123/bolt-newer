@@ -19,7 +19,7 @@ app.use('/api/v1', indexRouter);
 import { Request } from 'express';
 
 export interface AuthenticatedRequest extends Request {
-  user?: { id: string }; // Adjust based on your user object
+  user?: { id: string }; 
 }
 
 app.listen(config.PORT, async () => {

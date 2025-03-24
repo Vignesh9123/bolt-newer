@@ -412,6 +412,7 @@
 // parseXML(sampleString);
 
 /* Now we will hence try to write a parser that can handle streaming responses */
+import { Response } from "express";
 import { saveAction } from "./utils";
 export class XMLParser {
   public currentString: string;
@@ -429,7 +430,7 @@ export class XMLParser {
   append(string: string) {
     this.currentString += string;
   }
-  parse():string | undefined {
+  parse(res: Response):string | undefined {
     // console.log("Current String", this.currentString);
     const actionStart = this.currentString.split("\n").findIndex((line) => line.trim().startsWith("<boltAction"));
     if(actionStart == -1){
@@ -454,18 +455,32 @@ export class XMLParser {
       this.onFileCommand(filePath || 'sample.txt', content);
       saveAction(`Created ${filePath}`, this.currentProjectId, this.chatBlockId).then((action) => {
         console.log("Action saved", action);
+        const response = {
+          type:"action",
+          _id: action._id,
+          actionType: "file",
+          content: `Created ${filePath}`
+        }
+        res.write(`data: ${JSON.stringify(response)}\n\n`);
       })
     }
     else if(type == "shell") {
       this.onShellCommand(content);
       saveAction(`Executing command: ${content}`, this.currentProjectId, this.chatBlockId).then((action) => {
         console.log("Action saved", action);
+        const response = {
+          type:"action",
+          _id: action._id,
+          actionType: "shell",
+          content: `Executing command: ${content}`
+        }
+        res.write(`data: ${JSON.stringify(response)}\n\n`);
       })
     }
     this.currentString = this.currentString.split("\n").slice(actionEnd + 1).join("\n");
     if(this.currentString.trim().startsWith("<boltAction")) {
       // console.log("Content", content.trim());
-      return content?.split('\n').map((line) => line.trim()).join('\n') + this.parse() || ""; // Use this for only test purposes else we can comment this line
+      return content?.split('\n').map((line) => line.trim()).join('\n') + this.parse(res) || ""; // Use this for only test purposes else we can comment this line
       // return this.parse(); // Use this if not testing the parser
     } 
     // console.log("Content", content.trim());

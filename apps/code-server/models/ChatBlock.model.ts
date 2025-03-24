@@ -26,8 +26,10 @@ const ChatBlockSchema = new Schema({
         }
     ],
     prompt: { 
-        type: String, 
-        required: (v: any) => v.role === 'user' 
+        type: String,
+        required: function(this: IChatBlock) {
+            return this.role === 'user';
+        } 
     }
 }, {timestamps: true})
 

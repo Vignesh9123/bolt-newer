@@ -10,7 +10,7 @@ export const saveAction = async (desc: string, projectId: string, chatBlockId: s
         throw new Error("ChatBlock does not belong to this project");
     }
     const action = await ActionModel.create({
-        description: desc,
+        desc,
         chatBlockId
     }) 
     chatBlock.actions.push(action._id as mongoose.Types.ObjectId);
