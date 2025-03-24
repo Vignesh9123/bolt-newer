@@ -9,6 +9,8 @@ import Project from './models/Project.model';
 
 dotenv.config();
 import { connectDB } from './utils/connectDB';
+import ChatBlockModel from './models/ChatBlock.model';
+import mongoose from 'mongoose';
 const app = express()
 
 app.use(express.json());
@@ -23,24 +25,30 @@ app.post('/prompt', async (req, res) => {
         console.log('prompt', prompt);
         const project = await Project.findById(projectId) as IProject;
         const history = project.chats?.map((chat: any) => ({role: chat.from == "user" ? "user" : "model", parts: [{text: chat.content.content}]})) as any || [] ;
+        const userChatBlock = await ChatBlockModel.create({
+            projectId,
+            role: "user",
+            prompt
+        })
+        project.chatBlocks.push(userChatBlock._id as mongoose.Types.ObjectId);
         //One-shot response - Receive a single big response
         // const session = promptModel.startChat(
         //     {
-        //         history
-        //     }
-        // )
-        // const response = await session.sendMessage(prompt);
+            //         history
+            //     }
+            // )
+            // const response = await session.sendMessage(prompt);
         
-        //Stream response - Receive multiple small responses in a stream to form a big response at last
-        const session = promptModel.startChat(
-            {
-                history
-            }
-        )
-        const response = await session.sendMessageStream(prompt);
-        let xmlWrappedContent = ''
-        const xmlParserFunctions = {
-            "file": (filePath: string, content: string) => {
+            //Stream response - Receive multiple small responses in a stream to form a big response at last
+            const session = promptModel.startChat(
+                {
+                    history
+                }
+            )
+            const response = await session.sendMessageStream(prompt);
+            let xmlWrappedContent = ''
+            const xmlParserFunctions = {
+                "file": (filePath: string, content: string) => {
                 onFileCommand({
                     filePath,
                     content
@@ -50,7 +58,13 @@ app.post('/prompt', async (req, res) => {
                 onShellCommand(content);
             }
         }
-        const parser = new XMLParser({onFileCommand: xmlParserFunctions.file, onShellCommand: xmlParserFunctions.shell});
+        const assistantChatBlock = await ChatBlockModel.create({
+            projectId,
+            role: "assistant",
+            actions: []
+        })
+        project.chatBlocks.push(assistantChatBlock._id as mongoose.Types.ObjectId);
+        const parser = new XMLParser({onFileCommand: xmlParserFunctions.file, onShellCommand: xmlParserFunctions.shell, currentProjectId: projectId, chatBlockId: (assistantChatBlock._id as mongoose.Types.ObjectId).toString()});
         for await (const chunk of response.stream) {
             xmlWrappedContent += chunk.candidates?.[0].content.parts[0].text;
             

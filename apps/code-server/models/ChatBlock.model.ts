@@ -25,6 +25,10 @@ const ChatBlockSchema = new Schema({
             ref:'Action'
         }
     ],
+    prompt: { 
+        type: String, 
+        required: (v: any) => v.role === 'user' 
+    }
 }, {timestamps: true})
 
 export default model<IChatBlock>('ChatBlock', ChatBlockSchema)
